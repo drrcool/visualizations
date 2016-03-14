@@ -1,10 +1,10 @@
-"""Generate a visualization of the MMT Queue.
+""" Testbed for schedule plotting code."""
 
-Inputs : schedule.dat which includes the scheduled
-         programs to be plotted.
-"""
 import matplotlib.pyplot as plt
+
 import datetime
+import numpy as np
+import sys
 import re
 
 
@@ -23,8 +23,9 @@ def string2decTime(time):
     return seconds / 3600.
 
 
-def plotQueue():
+def main(argv):
     """Test code."""
+
     fileName = 'schedule.dat'
     f = open(fileName, 'r')
     startTime = []
@@ -52,32 +53,34 @@ def plotQueue():
 
     plt.figure(figsize=(12, 12))
     plt.plot([0, 0], [0, 0], visible=False)
+    plt.rcParams['font.size'] = 12
 
+    xpos = []
     for ii in range(len(dates)):
         idate = strings2datetime(dates[ii], "00:00:00")
         index = (idate-mindate).days
-
+        xpos.append(index)
         # Package the rectangle
         xval = [index - 0.45, index + 0.45]
         y1 = [startTime[ii], startTime[ii]]
         y2 = [endTime[ii], endTime[ii]]
 
-        plt.fill_between(xval, y1, y2, alpha=0.15, color='green')
-
-        # This text is not great (because the size of the block is
-        # so variable).  It's enough to see whats going where.
-        plt.text(index, startTime[ii]+0.6*(endTime[ii]-startTime[ii]),
-                 field[ii], rotation=90)
+        plt.fill_between(xval, y1, y2, alpha=0.15)
+        plt.text(index, startTime[ii]+0.5*(endTime[ii]-startTime[ii]),
+                 field[ii], rotation=90, va='center')
 
     plt.title("MMIRS Schedule March 2016")
-    plt.xlabel("Time (UT hour)")
-    plt.ylabel("Night")
+    plt.ylabel("Time (UT hour)")
+
+    plt.xticks(xpos, dates, rotation=90)
+    plt.xlabel("UT Date (local day + 1)")
 
     plt.xlim(-0.8, nDays+0.8)
     plt.ylim(max(endTime)+1, min(startTime)-1)
     plt.grid(0)
 
+    #plt.show()
     plt.savefig('schedule.pdf')
 
 if __name__ == "__main__":
-    plotQueue()
+    main(sys.argv)
